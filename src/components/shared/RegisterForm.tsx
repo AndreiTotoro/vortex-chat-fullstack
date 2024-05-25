@@ -16,6 +16,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "../ui/button";
+import registerUser from "@/lib/actions/user.actions";
+import { IUser } from "@/lib/database/models/user.models";
+import { UserType } from "@/types";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   username: z.string().min(2, {
@@ -38,6 +42,16 @@ export default function RegisterForm() {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    const res = await registerUser(values.username, values.password);
+
+    if (res.error) {
+      console.log(res.error);
+      toast.error(res.error);
+    } else if (res.user) {
+      const newUser: UserType = res.user;
+      toast.success(`Welcome ${newUser.username}!`);
+    }
+
     form.reset();
   }
 
