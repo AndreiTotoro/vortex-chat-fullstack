@@ -53,7 +53,7 @@ export default function RegisterForm() {
         toast.error(res.error);
       } else if (res.user) {
         const newUser: UserType = res.user;
-        toast.success(`Account successfully created ${newUser.username}!`);
+        toast.success(`Account successfully created!`);
         router.push("/");
       }
 
