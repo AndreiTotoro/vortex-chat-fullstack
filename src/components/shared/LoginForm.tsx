@@ -50,8 +50,8 @@ export default function LoginForm() {
         console.log(res.error);
         toast.error(res.error);
       } else if (res.user) {
-        const newUser: UserType = res.user;
-        toast.success(`Welcome, ${newUser.username}!`);
+        const user: UserType = res.user;
+        toast.success(`Welcome, ${user.username}!`);
         router.push("/");
       }
 
