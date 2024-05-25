@@ -20,6 +20,7 @@ import registerUser from "@/lib/actions/user.actions";
 import { IUser } from "@/lib/database/models/user.models";
 import { UserType } from "@/types";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   username: z.string().min(2, {
@@ -32,6 +33,8 @@ const formSchema = z.object({
 });
 
 export default function RegisterForm() {
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -49,7 +52,8 @@ export default function RegisterForm() {
       toast.error(res.error);
     } else if (res.user) {
       const newUser: UserType = res.user;
-      toast.success(`Welcome ${newUser.username}!`);
+      toast.success(`Account successfully created ${newUser.username}!`);
+      router.push("/");
     }
 
     form.reset();
