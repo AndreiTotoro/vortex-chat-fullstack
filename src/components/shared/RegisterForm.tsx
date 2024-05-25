@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "../ui/button";
-import registerUser from "@/lib/actions/user.actions";
+import { registerUser } from "@/lib/actions/user.actions";
 import { IUser } from "@/lib/database/models/user.models";
 import { UserType } from "@/types";
 import { toast } from "sonner";
@@ -45,18 +45,23 @@ export default function RegisterForm() {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const res = await registerUser(values.username, values.password);
+    try {
+      const res = await registerUser(values.username, values.password);
 
-    if (res.error) {
-      console.log(res.error);
-      toast.error(res.error);
-    } else if (res.user) {
-      const newUser: UserType = res.user;
-      toast.success(`Account successfully created ${newUser.username}!`);
-      router.push("/");
+      if (res.error) {
+        console.log(res.error);
+        toast.error(res.error);
+      } else if (res.user) {
+        const newUser: UserType = res.user;
+        toast.success(`Account successfully created ${newUser.username}!`);
+        router.push("/");
+      }
+
+      form.reset();
+    } catch (error: any) {
+      console.log(error);
+      toast.error(error.message);
     }
-
-    form.reset();
   }
 
   return (

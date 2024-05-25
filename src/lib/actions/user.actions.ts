@@ -4,13 +4,14 @@ import bcrypt from "bcryptjs";
 import User, { IUser } from "../database/models/user.models";
 import { createUserParams, UserType } from "@/types";
 import { connectToDatabase } from "../database";
+import { revalidatePath } from "next/cache";
 
 interface UserResponse {
   user?: UserType;
   error?: string;
 }
 
-export default async function registerUser(
+export async function registerUser(
   username: string,
   password: string
 ): Promise<UserResponse> {
@@ -40,8 +41,37 @@ export default async function registerUser(
     if (!createdUser) {
       return { error: "User not created" };
     }
-
+    revalidatePath("/register");
     return { user: JSON.parse(JSON.stringify(createdUser)) };
+  } catch (error: any) {
+    console.log(error);
+    return { error: error.message };
+  }
+}
+
+export async function loginUser(
+  username: string,
+  password: string
+): Promise<UserResponse> {
+  try {
+    await connectToDatabase();
+
+    const user: IUser | undefined | null = await User.findOne({
+      username: username,
+    });
+
+    if (!user) {
+      return { error: "Username or Password are incorrect." };
+    }
+
+    const validPassword = await bcrypt.compare(password, user.password);
+
+    if (!validPassword) {
+      return { error: "Username or Password are incorrect." };
+    }
+
+    revalidatePath("/login");
+    return { user: JSON.parse(JSON.stringify(user)) };
   } catch (error: any) {
     console.log(error);
     return { error: error.message };

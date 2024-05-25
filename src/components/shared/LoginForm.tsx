@@ -16,6 +16,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "../ui/button";
+import { loginUser } from "@/lib/actions/user.actions";
+import { toast } from "sonner";
+import { UserType } from "@/types";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   username: z.string().min(2, {
@@ -27,6 +31,8 @@ const formSchema = z.object({
 });
 
 export default function LoginForm() {
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -36,7 +42,25 @@ export default function LoginForm() {
   });
 
   // 2. Define a submit handler.
-  async function onSubmit(values: z.infer<typeof formSchema>) {}
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const res = await loginUser(values.username, values.password);
+
+      if (res.error) {
+        console.log(res.error);
+        toast.error(res.error);
+      } else if (res.user) {
+        const newUser: UserType = res.user;
+        toast.success(`Welcome, ${newUser.username}!`);
+        router.push("/");
+      }
+
+      form.reset();
+    } catch (error: any) {
+      console.log(error);
+      toast.error(error.message);
+    }
+  }
 
   return (
     <div>
